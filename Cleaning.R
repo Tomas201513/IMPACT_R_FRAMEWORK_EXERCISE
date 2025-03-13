@@ -1,5 +1,5 @@
-install.packages("devtools")
-devtools::install_github("impact-initiatives/cleaningtools")
+# install.packages("devtools")
+# devtools::install_github("impact-initiatives/cleaningtools")
 library(cleaningtools)
 library(dplyr)
 
@@ -9,8 +9,9 @@ library(dplyr)
 # The easiest way to get dplyr is to install the whole tidyverse:
 #install.packages("tidyverse")
 
-my_raw_dataset <- cleaningtools::cleaningtools_raw_data
 
+###########################  Data  #######################################################################
+my_raw_dataset <- cleaningtools::cleaningtools_raw_data
 #View(my_raw_dataset)
 #names(my_raw_dataset)
 #my_raw_dataset |> head()
@@ -25,7 +26,9 @@ my_kobo_choice <- cleaningtools::cleaningtools_choices
 output_from_data <- cleaningtools::check_pii(dataset = cleaningtools::cleaningtools_raw_data, words_to_look = "date", uuid_column = "X_uuid")
 output_from_data$potential_PII |> head()
 
-#check_outliers
+
+
+#check_outliers (+/- 3 standard deviation...log(x + 1) transformation)
 my_log1 <- my_raw_dataset %>% 
   check_outliers(uuid_column = "X_uuid")
 
@@ -117,7 +120,12 @@ example_logic$logical_all %>%
 #Pipe-able
 my_log3 <- my_raw_dataset %>% 
   check_outliers(uuid_column = "X_uuid") %>% 
-  check_duplicate(uuid_column = "X_uuid")
+  check_duplicate(uuid_column = "X_uuid") %>%
+  check_soft_duplicates(uuid_column = "X_uuid", kobo_survey = my_kobo_survey, sm_separator = ".") %>%
+  check_value(uuid_column = "X_uuid") %>%
+  check_duration(column_to_check = "duration", uuid_column = "X_uuid") %>%
+  check_others(uuid_column = "X_uuid", columns_to_check = other_columns_to_check)
+
 
 my_log3$potential_outliers %>% 
   head()
