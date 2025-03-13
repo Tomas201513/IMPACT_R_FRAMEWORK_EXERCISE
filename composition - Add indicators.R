@@ -5,6 +5,10 @@ library(impactR4PHU)
 library(dplyr)
 library(addindicators)
 
+# To Compose MSNA Indicators use humind
+# install.packages("devtools")
+# devtools::install_github("impact-initiatives-hppu/humind")
+
 my_data <- impactR4PHU::impactR4PHU_data_template |>  
   filter(respondent_consent != "no") 
 names(my_data)
