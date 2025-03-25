@@ -4,15 +4,17 @@ library(analysistools)
 library(dplyr)
 
 my_data <- analysistools_MSNA_template_data
+
+# identify NA columns
 only_nas <- analysistools_MSNA_template_data %>%
   summarise(across(.cols = everything(), .fns = function(x) {
     sum(is.na(x)) == nrow(analysistools_MSNA_template_data)
   })) %>%
   do.call(c, .)
 
+# filter out NA columns
 my_data_shorter <- analysistools_MSNA_template_data[, !only_nas] %>%
   select(!grep("other", names(analysistools_MSNA_template_data), value = T))
-
 View(my_data_shorter)
 
 
@@ -31,7 +33,8 @@ my_analysis$results_table %>%
 
 
 
-#----------------------------------create_analysis-----------------------------------------------------------------------
+
+#----------------------------------create_analysis (with strata and population )-----------------------------------------------------------------------
 sampling_frame <- data.frame(
   strata = c("admin1a", "admin1b", "admin1c"),
   population = c(100000, 200000, 300000)
@@ -47,6 +50,12 @@ my_exercise_design_weigthed <- srvyr::as_survey_design(exercise_data_shorter_wei
 
 # create_analysis
 my_answer_analysis_weighted <- create_analysis(my_exercise_design_weigthed, sm_separator = "/")
+
+
+
+
+
+
 
 
 
@@ -95,6 +104,7 @@ View(my_results)
 
 
 
+
 #----------------------------------02 - Ratio ----------------------------------------------------------
 library(analysistools)
 library(dplyr)
@@ -127,6 +137,7 @@ my_design <- srvyr::as_survey_design(my_data, weights = "weights", strata = "adm
 # read loa
 my_loa_with_ratio <- read.csv("./inputs/07 - example - loa_with_ratio.csv")
 View(my_loa_with_ratio)
+
 # filter ratio
 my_loa_with_ratio %>% 
   filter(analysis_type == "ratio") |>
@@ -140,6 +151,7 @@ my_results_with_ratio$results_table %>%
   filter(analysis_type == "ratio")
 
 View(my_results_with_ratio)
+
 
 
 
@@ -173,6 +185,7 @@ create_analysis_ratio(me_design,
 
 
 
+
 #----------------------------------EXCERCISE ----------------------------------------------------------
 library(analysistools)
 library(dplyr)
@@ -193,6 +206,6 @@ exercise_data <- exercise_data %>%
 exercise_design <- srvyr::as_survey_design(exercise_data, weights = "weights", strata = "admin1")
 
 exercise_loa <- readxl::read_excel("./inputs/09 - correction - loa.xlsx")
-
+View(exercise_loa)
 exercise_results <- create_analysis(exercise_design, loa = exercise_loa, sm_separator = "/")
 View(exercise_results$results_table)
