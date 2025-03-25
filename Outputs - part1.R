@@ -1,5 +1,5 @@
 ####################################################################################################################################
-################################### Chapter 6: Outputs   ###########################################################################
+################################### Chapter 6: Outputs - Part 1  ###########################################################################
 
 
 
@@ -87,7 +87,71 @@ results_table_labeled <- add_label_columns_to_results_table(
 View(results_table_labeled)
 
 
-#----------------------------------02 Tabels ----------------------------------------------------------
+
+
+#----------------------------------02 Wide Tabels ----------------------------------------------------------
+
+# Long tabel - one that have the variables in the rows and the disagregation in the columns,
+# Wide table - one that have the disagregation in the rows and the variables in the columns.
+
 library(presentresults)
 
 my_results_table <- presentresults::presentresults_resultstable
+
+View(my_results_table)
+
+
+# create_*_group_x_variable  ----- Wide table with the groups in the rows and the variables in the columns.
+
+my_results_table %>% 
+  create_table_group_x_variable() %>% 
+  create_xlsx_group_x_variable(file_path = "./outputs/04 - example - group_x_variable.xlsx", overwrite = T)
+
+
+# create_*_variable_x_group  ----- Wide table with the variables in the rows and the groups in the columns.
+my_results_table %>% 
+  create_table_variable_x_group() %>%
+  create_xlsx_variable_x_group(file_path = "./outputs/05 - example - variable_x_group.xlsx", overwrite = T)
+
+
+
+
+
+#----------------------------------04 Practice 1----------------------------------------------------------
+
+library(dplyr)
+library(presentresults)
+
+label_exercise_results <- readxl::read_excel("./inputs/11 - exercise - label.xlsx", sheet = "results_table")
+label_exercise_kobo_survey <- readxl::read_excel("./inputs/11 - exercise - label.xlsx", sheet = "kobo_survey")
+label_exercise_kobo_choices <- readxl::read_excel("./inputs/11 - exercise - label.xlsx", sheet = "kobo_choices")
+
+head(label_exercise_results)
+head(label_exercise_kobo_survey)
+head(label_exercise_kobo_choices)
+
+
+label_exercise_kobo_survey <- label_exercise_kobo_survey %>% rename(`label::english`=label)
+label_exercise_kobo_choices <- label_exercise_kobo_choices %>% rename(`label::english`=label)
+
+
+
+review_kobo_labels_results <- review_kobo_labels(label_exercise_kobo_survey,
+                                                 label_exercise_kobo_choices,
+                                                 results_table=label_exercise_results)
+
+label_dictionary <- create_label_dictionary(label_exercise_kobo_survey,
+                                            label_exercise_kobo_choices,
+                                            results_table=label_exercise_results)
+
+View(label_dictionary)
+
+
+#----------------------------------04 Practice 2----------------------------------------------------------
+library(presentresults)
+library(dplyr)
+exercise_outputs <- readxl::read_excel("./inputs/10 - exercise - analysis_to_review.xlsx")
+
+exercise_outputs %>% 
+  create_table_group_x_variable() %>% 
+  create_xlsx_group_x_variable(file_path = "./outputs/06 - correction - group_x_variable_table.xlsx", overwrite = T) 
