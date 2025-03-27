@@ -1,21 +1,23 @@
 ####################################################################################################################################
-################################### Chapter 6: Outputs - Part 1  ###################################################################
-
+################################### Chapter 7: Outputs - Part 1  ###################################################################
 
 #---------------------------------- 01 Labels ----------------------------------------------------------
 
 # Outputs: Any manipulation to format the outputs. Outputs are created from the results table, from the stat + analysis key
 
+# install.packages("devtools")
+#devtools::install_github("impact-initiatives/presentresults")
 library(presentresults)
 library(dplyr)
 
 results_table <- presentresults_MSNA2024_results_table
+#results_table[c(1,9), c("analysis_var", "group_var", "group_var_value")]
 View(results_table)
 
 kobo_survey <- presentresults_MSNA2024_kobotool_template$kobo_survey
 kobo_choices <- presentresults_MSNA2024_kobotool_template$kobo_choices
 
-results_table[c(1,9), c("analysis_var", "group_var", "group_var_value")]
+
 kobo_survey |>
   tail() |>
   select(type, name, `label::english`)
@@ -26,7 +28,9 @@ kobo_survey |>
 # 1- review the KOBO tools for duplicate label and name 
 # If there are new variables added to the dataset, they should also be added in the KOBO tool.
 
-review_kobo_labels_results <- review_kobo_labels(kobo_survey,kobo_choices,results_table=results_table)
+review_kobo_labels_results <- review_kobo_labels(kobo_survey, 
+                                                 kobo_choices,
+                                                 results_table=results_table)
 review_kobo_labels_results
 
 
@@ -44,15 +48,17 @@ kobo_survey_fixed[
   )
 )
 
+# Filtering Out Specific Choices
 kobo_choices_fixed <- kobo_choices |>
   filter(!`label::english` %in% c(
     "No shelter (sleeping in the open)",
     "Surface water (river, dam, lake, pond, stream, canal, irrigation channel)"
   ))
 
+# Identifying Duplicated Labels
 duplicated_listname_label <- review_kobo_labels_results |> filter(comments == "Kobo choices sheet has duplicated labels in the same list_name.")
 
-
+# Fixing Duplicated Labels - appends a row number to the label
 kobo_choices_fixed <- kobo_choices_fixed |>
   group_by(list_name)  |> 
   mutate(`label::english` = case_when(
@@ -62,12 +68,20 @@ kobo_choices_fixed <- kobo_choices_fixed |>
   ungroup()
 
 
-#review te=he tool
-review_kobo_labels(kobo_survey_fixed, kobo_choices_fixed, results_table = results_table)
+#review the tool
+review_kobo_labels(kobo_survey_fixed, 
+                   kobo_choices_fixed, 
+                   results_table = results_table)
+
+
+
+
 
 
 #2 - create label dictionary
-label_dictionary <- create_label_dictionary(kobo_survey_fixed,kobo_choices_fixed,results_table=results_table)
+label_dictionary <- create_label_dictionary(kobo_survey_fixed,
+                                            kobo_choices_fixed,
+                                            results_table=results_table)
 View(label_dictionary)
 
 label_dictionary$dictionary_survey |> head(10)
@@ -76,19 +90,22 @@ label_dictionary$analysis_type_dictionary |> head(10)
 
 
 
+
+
+
+
+
 #3 - add labels to result table
 
-results_table_labeled <- add_label_columns_to_results_table(
-  results_table,
-  label_dictionary
-)
+results_table_labeled <- add_label_columns_to_results_table(results_table,
+                                                              label_dictionary)
 
 View(results_table_labeled)
 
 
 
 
-#---------------------------------- 02 Wide Tabels ----------------------------------------------------------
+#---------------------------------- 02 Wide Tables ----------------------------------------------------------
 
 # Long tabel - one that have the variables in the rows and the disagregation in the columns,
 # Wide table - one that have the disagregation in the rows and the variables in the columns.
@@ -104,15 +121,20 @@ View(my_results_table)
 
 my_results_table %>% 
   create_table_group_x_variable() %>% 
-  create_xlsx_group_x_variable(file_path = "./outputs/04 - example - group_x_variable.xlsx", overwrite = T)
+  create_xlsx_group_x_variable(file_path = "./outputs/04 - example - group_x_variable.xlsx",
+                               value_columns = c("stat", "n", "n_total"),
+                               overwrite = T)
 
 
 # create_*_variable_x_group  ----- Wide table with the variables in the rows and the groups in the columns.
 my_results_table %>% 
   create_table_variable_x_group() %>%
-  create_xlsx_variable_x_group(file_path = "./outputs/05 - example - variable_x_group.xlsx", overwrite = T)
+  create_xlsx_variable_x_group(
+    value_columns = c("stat","n", "n_total"),
+    file_path = "./outputs/05 - example - variable_x_group.xlsx",
+    overwrite = T)
 
-
+?create_xlsx_variable_x_group
 
 
 
